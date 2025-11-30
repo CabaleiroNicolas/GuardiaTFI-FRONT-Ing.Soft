@@ -17,6 +17,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [patientCuil, setPatientCuil] = useState('');
   
   const [formData, setFormData] = useState<CreateAdmissionData>({
     patientId: '',
@@ -35,7 +36,16 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
     e.preventDefault();
 
     // Validaciones
-    if (!formData.patientId || !formData.informe) {
+    if (!patientCuil || patientCuil.length !== 11) {
+      toast({
+        title: 'Error de validación',
+        description: 'El CUIL del paciente debe tener 11 dígitos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.informe) {
       toast({
         title: 'Error de validación',
         description: 'Complete todos los campos obligatorios',
@@ -74,14 +84,40 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
+      // Paso 1: Verificar que el paciente existe usando el CUIL
+      // TODO: Reemplazar con tu URL del backend
+      // const patientResponse = await fetch(`${import.meta.env.VITE_API_URL}/patients/cuil/${patientCuil}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization': `Bearer ${user?.token}`,
+      //   },
+      // });
+      //
+      // if (!patientResponse.ok) {
+      //   toast({
+      //     title: "Paciente no encontrado",
+      //     description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero.",
+      //     variant: "destructive",
+      //   });
+      //   setIsLoading(false);
+      //   return;
+      // }
+      //
+      // const patient = await patientResponse.json();
+      
+      // Paso 2: Registrar el ingreso con el ID del paciente
+      // const admissionData = {
+      //   ...formData,
+      //   patientId: patient.id,
+      // };
+      //
       // const response = await fetch(`${import.meta.env.VITE_API_URL}/admissions`, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
       //     'Authorization': `Bearer ${user?.token}`,
       //   },
-      //   body: JSON.stringify(formData),
+      //   body: JSON.stringify(admissionData),
       // });
       //
       // if (!response.ok) {
@@ -94,6 +130,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       });
 
       // Reset form
+      setPatientCuil('');
       setFormData({
         patientId: '',
         informe: '',
@@ -129,17 +166,24 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* CUIL del Paciente */}
+          <div className="space-y-2">
+            <Label htmlFor="patientCuil">CUIL del Paciente *</Label>
+            <Input
+              id="patientCuil"
+              type="text"
+              maxLength={11}
+              placeholder="20123456789"
+              value={patientCuil}
+              onChange={(e) => setPatientCuil(e.target.value.replace(/\D/g, ''))}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              El paciente debe estar registrado previamente
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="patientId">ID del Paciente *</Label>
-              <Input
-                id="patientId"
-                placeholder="Buscar o crear paciente"
-                value={formData.patientId}
-                onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                required
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="nivelEmergencia">Nivel de Emergencia *</Label>
