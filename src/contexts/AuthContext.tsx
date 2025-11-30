@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Replace with actual API call
+      // TODO: Descomentar cuando conectes el backend
       // const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
@@ -46,6 +46,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 
       // const data = await response.json();
       // const { token, role } = data;
+      //
+      // const userData: User = {
+      //   email,
+      //   role: role, // El backend debe retornar el rol del usuario
+      //   token: token,
+      // };
 
       // Mock response for development
       const mockToken = 'mock-jwt-token-' + Date.now();

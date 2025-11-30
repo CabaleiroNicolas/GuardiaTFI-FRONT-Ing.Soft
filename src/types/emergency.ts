@@ -36,11 +36,6 @@ export const EMERGENCY_LEVELS: Record<EmergencyLevel, EmergencyLevelInfo> = {
   },
 };
 
-export interface BloodPressure {
-  sistolica: number; // mmHg
-  diastolica: number; // mmHg
-}
-
 export interface Admission {
   id: string;
   patientId: string;
@@ -49,20 +44,21 @@ export interface Admission {
   informe: string;
   nivelEmergencia: EmergencyLevel;
   estado: AdmissionStatus;
-  temperatura?: number; // Celsius
-  frecuenciaCardiaca: number; // lpm (latidos por minuto)
-  frecuenciaRespiratoria: number; // rpm (respiraciones por minuto)
-  tensionArterial: BloodPressure;
+  temperatura: number;
+  frecCardiaca: number;
+  frecRespiratoria: number;
+  tensionArterial: string;
   enfermeraId: string;
   enfermeraNombre: string;
+  isOverdue?: boolean;
 }
 
 export interface CreateAdmissionData {
-  patientId: string;
+  cuil: string;
+  temperatura: number;
+  frecCardiaca: number;
+  frecRespiratoria: number;
+  tensionArterial: string;
+  nivelEmergencia: string;
   informe: string;
-  nivelEmergencia: EmergencyLevel;
-  temperatura?: number;
-  frecuenciaCardiaca: number;
-  frecuenciaRespiratoria: number;
-  tensionArterial: BloodPressure;
 }

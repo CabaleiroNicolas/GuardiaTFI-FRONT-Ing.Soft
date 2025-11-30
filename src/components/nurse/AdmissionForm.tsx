@@ -20,16 +20,13 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
   const [patientCuil, setPatientCuil] = useState('');
   
   const [formData, setFormData] = useState<CreateAdmissionData>({
-    patientId: '',
+    cuil: '',
     informe: '',
-    nivelEmergencia: 'URGENCIA' as EmergencyLevel,
-    temperatura: undefined,
-    frecuenciaCardiaca: 0,
-    frecuenciaRespiratoria: 0,
-    tensionArterial: {
-      sistolica: 0,
-      diastolica: 0,
-    },
+    nivelEmergencia: 'URGENCIA',
+    temperatura: 0,
+    frecCardiaca: 0,
+    frecRespiratoria: 0,
+    tensionArterial: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +42,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       return;
     }
 
-    if (!formData.informe) {
+    if (!formData.informe || !formData.tensionArterial) {
       toast({
         title: 'Error de validación',
         description: 'Complete todos los campos obligatorios',
@@ -54,28 +51,10 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       return;
     }
 
-    if (formData.frecuenciaCardiaca < 0) {
+    if (formData.frecCardiaca < 0 || formData.frecRespiratoria < 0 || formData.temperatura < 0) {
       toast({
         title: 'Error de validación',
-        description: 'La frecuencia cardíaca no puede ser negativa',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (formData.frecuenciaRespiratoria < 0) {
-      toast({
-        title: 'Error de validación',
-        description: 'La frecuencia respiratoria no puede ser negativa',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (formData.tensionArterial.sistolica < 0 || formData.tensionArterial.diastolica < 0) {
-      toast({
-        title: 'Error de validación',
-        description: 'Los valores de tensión arterial no pueden ser negativos',
+        description: 'Los valores no pueden ser negativos',
         variant: 'destructive',
       });
       return;
@@ -84,34 +63,13 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
     setIsLoading(true);
 
     try {
-      // Paso 1: Verificar que el paciente existe usando el CUIL
-      // TODO: Reemplazar con tu URL del backend
-      // const patientResponse = await fetch(`${import.meta.env.VITE_API_URL}/patients/cuil/${patientCuil}`, {
-      //   method: 'GET',
-      //   headers: {
-      //     'Authorization': `Bearer ${user?.token}`,
-      //   },
-      // });
-      //
-      // if (!patientResponse.ok) {
-      //   toast({
-      //     title: "Paciente no encontrado",
-      //     description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero.",
-      //     variant: "destructive",
-      //   });
-      //   setIsLoading(false);
-      //   return;
-      // }
-      //
-      // const patient = await patientResponse.json();
-      
-      // Paso 2: Registrar el ingreso con el ID del paciente
-      // const admissionData = {
-      //   ...formData,
-      //   patientId: patient.id,
-      // };
-      //
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/admissions`, {
+      const admissionData = {
+        ...formData,
+        cuil: patientCuil,
+      };
+
+      // TODO: Descomentar cuando conectes el backend
+      // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
@@ -121,8 +79,21 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       // });
       //
       // if (!response.ok) {
-      //   throw new Error('Error al crear el ingreso');
+      //   const errorData = await response.json();
+      //   if (response.status === 400 && errorData.message?.includes('paciente')) {
+      //     toast({
+      //       title: "Paciente no registrado",
+      //       description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero en la pestaña 'Registrar Paciente'.",
+      //       variant: "destructive",
+      //     });
+      //     setIsLoading(false);
+      //     return;
+      //   }
+      //   throw new Error('Error al registrar el ingreso');
       // }
+
+      // Simulación de éxito
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: 'Éxito',
@@ -132,16 +103,13 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       // Reset form
       setPatientCuil('');
       setFormData({
-        patientId: '',
+        cuil: '',
         informe: '',
-        nivelEmergencia: 'URGENCIA' as EmergencyLevel,
-        temperatura: undefined,
-        frecuenciaCardiaca: 0,
-        frecuenciaRespiratoria: 0,
-        tensionArterial: {
-          sistolica: 0,
-          diastolica: 0,
-        },
+        nivelEmergencia: 'URGENCIA',
+        temperatura: 0,
+        frecCardiaca: 0,
+        frecRespiratoria: 0,
+        tensionArterial: '',
       });
 
       onSuccess();
@@ -189,7 +157,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
               <Label htmlFor="nivelEmergencia">Nivel de Emergencia *</Label>
               <Select
                 value={formData.nivelEmergencia}
-                onValueChange={(value) => setFormData({ ...formData, nivelEmergencia: value as EmergencyLevel })}
+                onValueChange={(value) => setFormData({ ...formData, nivelEmergencia: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -208,74 +176,58 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="frecuenciaCardiaca">Frecuencia Cardíaca (lpm) *</Label>
+              <Label htmlFor="frecCardiaca">Frecuencia Cardíaca (lpm) *</Label>
               <Input
-                id="frecuenciaCardiaca"
+                id="frecCardiaca"
                 type="number"
                 min="0"
                 step="0.1"
                 placeholder="70"
-                value={formData.frecuenciaCardiaca || ''}
-                onChange={(e) => setFormData({ ...formData, frecuenciaCardiaca: parseFloat(e.target.value) || 0 })}
+                value={formData.frecCardiaca || ''}
+                onChange={(e) => setFormData({ ...formData, frecCardiaca: parseFloat(e.target.value) || 0 })}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="frecuenciaRespiratoria">Frecuencia Respiratoria (rpm) *</Label>
+              <Label htmlFor="frecRespiratoria">Frecuencia Respiratoria (rpm) *</Label>
               <Input
-                id="frecuenciaRespiratoria"
+                id="frecRespiratoria"
                 type="number"
                 min="0"
                 step="0.1"
                 placeholder="16"
-                value={formData.frecuenciaRespiratoria || ''}
-                onChange={(e) => setFormData({ ...formData, frecuenciaRespiratoria: parseFloat(e.target.value) || 0 })}
+                value={formData.frecRespiratoria || ''}
+                onChange={(e) => setFormData({ ...formData, frecRespiratoria: parseFloat(e.target.value) || 0 })}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="temperatura">Temperatura (°C)</Label>
+              <Label htmlFor="temperatura">Temperatura (°C) *</Label>
               <Input
                 id="temperatura"
                 type="number"
                 step="0.1"
                 placeholder="36.5"
                 value={formData.temperatura || ''}
-                onChange={(e) => setFormData({ ...formData, temperatura: parseFloat(e.target.value) || undefined })}
+                onChange={(e) => setFormData({ ...formData, temperatura: parseFloat(e.target.value) || 0 })}
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Tensión Arterial (mmHg) *</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="0"
-                  placeholder="Sistólica"
-                  value={formData.tensionArterial.sistolica || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    tensionArterial: { ...formData.tensionArterial, sistolica: parseFloat(e.target.value) || 0 }
-                  })}
-                  required
-                />
-                <span className="text-muted-foreground">/</span>
-                <Input
-                  type="number"
-                  min="0"
-                  placeholder="Diastólica"
-                  value={formData.tensionArterial.diastolica || ''}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    tensionArterial: { ...formData.tensionArterial, diastolica: parseFloat(e.target.value) || 0 }
-                  })}
-                  required
-                />
-              </div>
+              <Label htmlFor="tensionArterial">Tensión Arterial (mmHg) *</Label>
+              <Input
+                id="tensionArterial"
+                type="text"
+                placeholder="120/80"
+                value={formData.tensionArterial}
+                onChange={(e) => setFormData({ ...formData, tensionArterial: e.target.value })}
+                required
+              />
               <p className="text-xs text-muted-foreground">
-                Ejemplo: 120/80
+                Formato: sistólica/diastólica (ejemplo: 120/80)
               </p>
             </div>
           </div>

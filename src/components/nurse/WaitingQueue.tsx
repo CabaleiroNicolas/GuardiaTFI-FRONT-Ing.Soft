@@ -48,9 +48,9 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
           nivelEmergencia: 'EMERGENCIA',
           estado: 'PENDIENTE',
           temperatura: 37.2,
-          frecuenciaCardiaca: 110,
-          frecuenciaRespiratoria: 22,
-          tensionArterial: { sistolica: 150, diastolica: 95 },
+          frecCardiaca: 110,
+          frecRespiratoria: 22,
+          tensionArterial: '150/95',
           enfermeraId: 'E001',
           enfermeraNombre: 'María García',
         },
@@ -62,9 +62,10 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
           informe: 'Fractura en brazo derecho',
           nivelEmergencia: 'URGENCIA',
           estado: 'PENDIENTE',
-          frecuenciaCardiaca: 85,
-          frecuenciaRespiratoria: 18,
-          tensionArterial: { sistolica: 120, diastolica: 80 },
+          temperatura: 36.8,
+          frecCardiaca: 85,
+          frecRespiratoria: 18,
+          tensionArterial: '120/80',
           enfermeraId: 'E001',
           enfermeraNombre: 'María García',
         },
@@ -77,9 +78,9 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
           nivelEmergencia: 'URGENCIA_MENOR',
           estado: 'PENDIENTE',
           temperatura: 38.5,
-          frecuenciaCardiaca: 92,
-          frecuenciaRespiratoria: 20,
-          tensionArterial: { sistolica: 115, diastolica: 75 },
+          frecCardiaca: 92,
+          frecRespiratoria: 20,
+          tensionArterial: '115/75',
           enfermeraId: 'E002',
           enfermeraNombre: 'Laura Rodríguez',
         },
@@ -182,16 +183,15 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                 <div className="flex items-center gap-1">
                   <Activity className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">FC:</span> {admission.frecuenciaCardiaca} lpm
+                  <span className="font-medium">FC:</span> {admission.frecCardiaca} lpm
                 </div>
                 <div className="flex items-center gap-1">
                   <Activity className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">FR:</span> {admission.frecuenciaRespiratoria} rpm
+                  <span className="font-medium">FR:</span> {admission.frecRespiratoria} rpm
                 </div>
                 <div className="flex items-center gap-1">
                   <Activity className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">TA:</span>{' '}
-                  {admission.tensionArterial.sistolica}/{admission.tensionArterial.diastolica}
+                  <span className="font-medium">TA:</span> {admission.tensionArterial}
                 </div>
                 {admission.temperatura && (
                   <div className="flex items-center gap-1">
