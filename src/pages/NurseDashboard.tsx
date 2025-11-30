@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PatientRegistration } from '@/components/nurse/PatientRegistration';
 import { AdmissionForm } from '@/components/nurse/AdmissionForm';
 import { WaitingQueue } from '@/components/nurse/WaitingQueue';
-import { LogOut, Activity } from 'lucide-react';
+import { LogOut, Activity, UserPlus, ClipboardList } from 'lucide-react';
 
 const NurseDashboard = () => {
   const { user, logout } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handlePatientRegistered = () => {
+    // Podrías mostrar un mensaje o actualizar algún contador
+  };
 
   const handleAdmissionSuccess = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -44,14 +50,40 @@ const NurseDashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div>
-            <AdmissionForm onSuccess={handleAdmissionSuccess} />
-          </div>
-          <div>
-            <WaitingQueue refreshTrigger={refreshTrigger} />
-          </div>
-        </div>
+        <Tabs defaultValue="register-patient" className="space-y-6">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <TabsTrigger value="register-patient" className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4" />
+              Registrar Paciente
+            </TabsTrigger>
+            <TabsTrigger value="register-admission" className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4" />
+              Registrar Ingreso
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="register-patient">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div>
+                <PatientRegistration onSuccess={handlePatientRegistered} />
+              </div>
+              <div>
+                <WaitingQueue refreshTrigger={refreshTrigger} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="register-admission">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div>
+                <AdmissionForm onSuccess={handleAdmissionSuccess} />
+              </div>
+              <div>
+                <WaitingQueue refreshTrigger={refreshTrigger} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
