@@ -19,11 +19,11 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
   
   const [patientData, setPatientData] = useState<CreatePatientData>({
     cuil: '',
-    nombre: '',
     apellido: '',
-    fechaNacimiento: new Date(),
-    telefono: '',
-    direccion: '',
+    nombre: '',
+    calle: '',
+    numero: 0,
+    localidad: '',
     obraSocial: '',
     numeroAfiliado: '',
   });
@@ -53,8 +53,8 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
     setIsLoading(true);
 
     try {
-      // TODO: Reemplazar con tu URL del backend
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/patients`, {
+      // TODO: Descomentar cuando conectes el backend
+      // const response = await fetch(`${import.meta.env.VITE_API_URL}/pacientes`, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
@@ -80,11 +80,11 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
       // Limpiar formulario
       setPatientData({
         cuil: '',
-        nombre: '',
         apellido: '',
-        fechaNacimiento: new Date(),
-        telefono: '',
-        direccion: '',
+        nombre: '',
+        calle: '',
+        numero: 0,
+        localidad: '',
         obraSocial: '',
         numeroAfiliado: '',
       });
@@ -128,19 +128,8 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
             />
           </div>
 
-          {/* Nombre y Apellido */}
+          {/* Apellido y Nombre */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nombre">Nombre *</Label>
-              <Input
-                id="nombre"
-                type="text"
-                placeholder="Juan"
-                value={patientData.nombre}
-                onChange={(e) => setPatientData({ ...patientData, nombre: e.target.value })}
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="apellido">Apellido *</Label>
               <Input
@@ -152,41 +141,56 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
                 required
               />
             </div>
-          </div>
-
-          {/* Fecha de Nacimiento */}
-          <div className="space-y-2">
-            <Label htmlFor="fechaNacimiento">Fecha de Nacimiento *</Label>
-            <Input
-              id="fechaNacimiento"
-              type="date"
-              value={patientData.fechaNacimiento.toISOString().split('T')[0]}
-              onChange={(e) => setPatientData({ ...patientData, fechaNacimiento: new Date(e.target.value) })}
-              required
-            />
-          </div>
-
-          {/* Teléfono */}
-          <div className="space-y-2">
-            <Label htmlFor="telefono">Teléfono</Label>
-            <Input
-              id="telefono"
-              type="tel"
-              placeholder="1234567890"
-              value={patientData.telefono}
-              onChange={(e) => setPatientData({ ...patientData, telefono: e.target.value })}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="nombre">Nombre *</Label>
+              <Input
+                id="nombre"
+                type="text"
+                placeholder="Juan"
+                value={patientData.nombre}
+                onChange={(e) => setPatientData({ ...patientData, nombre: e.target.value })}
+                required
+              />
+            </div>
           </div>
 
           {/* Dirección */}
           <div className="space-y-2">
-            <Label htmlFor="direccion">Dirección</Label>
+            <Label>Dirección *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <Input
+                  id="calle"
+                  type="text"
+                  placeholder="Calle"
+                  value={patientData.calle}
+                  onChange={(e) => setPatientData({ ...patientData, calle: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Input
+                  id="numero"
+                  type="number"
+                  placeholder="Número"
+                  value={patientData.numero || ''}
+                  onChange={(e) => setPatientData({ ...patientData, numero: parseInt(e.target.value) || 0 })}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Localidad */}
+          <div className="space-y-2">
+            <Label htmlFor="localidad">Localidad *</Label>
             <Input
-              id="direccion"
+              id="localidad"
               type="text"
-              placeholder="Calle 123, Ciudad"
-              value={patientData.direccion}
-              onChange={(e) => setPatientData({ ...patientData, direccion: e.target.value })}
+              placeholder="Ciudad"
+              value={patientData.localidad}
+              onChange={(e) => setPatientData({ ...patientData, localidad: e.target.value })}
+              required
             />
           </div>
 

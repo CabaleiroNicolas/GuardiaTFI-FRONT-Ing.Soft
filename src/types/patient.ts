@@ -3,20 +3,20 @@ export interface Patient {
   cuil: string;
   nombre: string;
   apellido: string;
-  fechaNacimiento: Date;
-  telefono?: string;
-  direccion?: string;
-  obraSocial?: string;
-  numeroAfiliado?: string;
+  calle: string;
+  numero: number;
+  localidad: string;
+  obraSocial: string;
+  numeroAfiliado: string;
 }
 
 export interface CreatePatientData {
   cuil: string;
-  nombre: string;
   apellido: string;
-  fechaNacimiento: Date;
-  telefono?: string;
-  direccion?: string;
-  obraSocial?: string;
-  numeroAfiliado?: string;
+  nombre: string;
+  calle: string;
+  numero: number;
+  localidad: string;
+  obraSocial: string;
+  numeroAfiliado: string;
 }
