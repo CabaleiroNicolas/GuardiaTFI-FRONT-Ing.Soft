@@ -62,3 +62,75 @@ export interface CreateAdmissionData {
   nivelEmergencia: string;
   informe: string;
 }
+
+// Backend response interfaces
+export interface BackendAdmissionResponse {
+  enfermera: {
+    email: string;
+    password: string;
+    role: string;
+    cuil: string;
+    apellido: string;
+    nombre: string;
+  };
+  estado: string;
+  fechaIngreso: string;
+  informe: string;
+  nivelEmergencia: string;
+  paciente: {
+    apellido: string;
+    cuil: string;
+    domicilio: {
+      calle: string;
+      numero: string;
+      localidad: string;
+    };
+    nombre: string;
+    obraSocial: {
+      numeroAfiliado: string | null;
+      obraSocial: {
+        id: number | null;
+        nombre: string;
+      };
+    };
+  };
+  signosVitales: {
+    frecCardiaca: string;
+    frecRespiratoria: string;
+    temperatura: string;
+    tensionArterial: {
+      frecDiastolica: string;
+      frecSistolica: string;
+    };
+  };
+}
+
+// Helper function to map backend response to frontend Admission type
+export const mapBackendAdmissionToAdmission = (backendAdmission: BackendAdmissionResponse): Admission => {
+  // Map nivelEmergencia string to EmergencyLevel
+  const emergencyLevelMap: Record<string, EmergencyLevel> = {
+    'Crítica': 'CRITICA',
+    'Emergencia': 'EMERGENCIA',
+    'Urgencia': 'URGENCIA',
+    'Urgencia Menor': 'URGENCIA_MENOR',
+    'Sin Urgencia': 'SIN_URGENCIA',
+  };
+
+  const nivelEmergencia = emergencyLevelMap[backendAdmission.nivelEmergencia] || 'SIN_URGENCIA';
+
+  return {
+    id: backendAdmission.paciente.cuil, // Using CUIL as ID since backend doesn't provide admission ID
+    patientId: backendAdmission.paciente.cuil,
+    patientName: `${backendAdmission.paciente.nombre} ${backendAdmission.paciente.apellido}`,
+    fechaIngreso: new Date(backendAdmission.fechaIngreso),
+    informe: backendAdmission.informe,
+    nivelEmergencia,
+    estado: backendAdmission.estado as AdmissionStatus,
+    temperatura: parseFloat(backendAdmission.signosVitales.temperatura),
+    frecCardiaca: parseFloat(backendAdmission.signosVitales.frecCardiaca),
+    frecRespiratoria: parseFloat(backendAdmission.signosVitales.frecRespiratoria),
+    tensionArterial: `${backendAdmission.signosVitales.tensionArterial.frecSistolica}/${backendAdmission.signosVitales.tensionArterial.frecDiastolica}`,
+    enfermeraId: backendAdmission.enfermera.cuil,
+    enfermeraNombre: `${backendAdmission.enfermera.nombre} ${backendAdmission.enfermera.apellido}`,
+  };
+};
