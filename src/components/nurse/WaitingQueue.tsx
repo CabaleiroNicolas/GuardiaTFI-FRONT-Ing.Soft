@@ -24,21 +24,21 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
   const fetchAdmissions = async () => {
     try {
       // TODO: Replace with actual API call
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/admissions/waiting`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${user?.token}`,
-      //   },
-      // });
-      // 
-      // if (!response.ok) {
-      //   throw new Error('Error al cargar la cola de espera');
-      // }
-      // 
-      // const data = await response.json();
-      // setAdmissions(data);
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
+         headers: {
+           'Authorization': `Bearer ${user?.token}`,
+         },
+       });
+       
+       if (!response.ok) {
+         throw new Error('Error al cargar la cola de espera');
+       }
+       
+       const data = await response.json();
+       setAdmissions(data);
 
       // Mock data for development
-      const mockAdmissions: Admission[] = [
+      /* const mockAdmissions: Admission[] = [
         {
           id: '1',
           patientId: 'P001',
@@ -85,8 +85,8 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
           enfermeraNombre: 'Laura Rodríguez',
         },
       ];
-
-      setAdmissions(mockAdmissions);
+ */
+      //setAdmissions(mockAdmissions);
     } catch (error) {
       console.error('Error fetching admissions:', error);
     } finally {

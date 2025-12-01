@@ -77,9 +77,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       });
       return;
     }
-
-
-
+    
     setIsLoading(true);
 
     try {
