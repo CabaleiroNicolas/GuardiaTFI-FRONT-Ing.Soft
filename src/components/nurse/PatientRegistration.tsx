@@ -53,24 +53,20 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
     setIsLoading(true);
 
     try {
-      // TODO: Descomentar cuando conectes el backend
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/pacientes`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${user?.token}`,
-      //   },
-      //   body: JSON.stringify(patientData),
-      // });
-      //
-      // if (!response.ok) {
-      //   throw new Error('Error al registrar el paciente');
-      // }
-      //
-      // const data = await response.json();
-
-      // Simulación de éxito
-      await new Promise(resolve => setTimeout(resolve, 1000));
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/pacientes`, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${user?.token}`,
+         },
+         body: JSON.stringify(patientData),
+       });
+      
+       if (!response.ok) {
+         throw new Error((await response.json()).message || 'Error al registrar el paciente');
+       }
+      
+       const data = await response.json();
 
       toast({
         title: "Paciente registrado",
@@ -93,7 +89,7 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo registrar el paciente. Intenta nuevamente.",
+        description: "El paciente ya se encuentra registrado",
         variant: "destructive",
       });
     } finally {

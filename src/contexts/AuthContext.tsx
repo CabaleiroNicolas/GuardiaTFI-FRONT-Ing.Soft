@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   email: string;
-  role: 'enfermera' | 'medico';
+  role: 'ENFERMERA' | 'MEDICO';
   token: string;
 }
 
@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user is already logged in (token in localStorage)
     const token = localStorage.getItem('token');
     const email = localStorage.getItem('email');
-    const role = localStorage.getItem('role') as 'enfermera' | 'medico' | null;
+    const role = localStorage.getItem('role') as 'ENFERMERA' | 'MEDICO' | null;
 
     if (token && email && role) {
       setUser({ email, role, token });
@@ -33,34 +33,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      // TODO: Descomentar cuando conectes el backend
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // 
-      // if (!response.ok) {
-      //   throw new Error('Login failed');
-      // }
-      // 
-      // const data = await response.json();
-      // const { token, role } = data;
-      //
-      // const userData: User = {
-      //   email,
-      //   role: role, // El backend debe retornar el rol del usuario
-      //   token: token,
-      // };
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // Mock response for development
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const mockRole = email.includes('enfermera') ? 'enfermera' : 'medico';
+      console.log(response)
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      const { access_token, rol } = data;
 
       const userData: User = {
         email,
-        role: mockRole,
-        token: mockToken,
+        role: rol,
+        token: access_token,
       };
 
       // Store in localStorage
