@@ -50,10 +50,30 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
     return diffInMinutes;
   };
 
+  const formatWaitingTime = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
+  };
+
   const isOverdue = (admission: Admission) => {
     const waitingTime = getWaitingTime(admission);
     const maxWaitTime = EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime;
     return waitingTime > maxWaitTime;
+  };
+
+  const getWaitingTimeColor = (admission: Admission) => {
+    const waitingTime = getWaitingTime(admission);
+    const maxWaitTime = EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime;
+    const percentage = (waitingTime / maxWaitTime) * 100;
+
+    if (percentage >= 100) return 'text-destructive font-bold';
+    if (percentage >= 80) return 'text-warning font-semibold';
+    if (percentage >= 60) return 'text-muted-foreground font-medium';
+    return 'text-muted-foreground';
   };
 
   const getLevelBadgeColor = (level: Admission['nivelEmergencia']) => {
@@ -150,13 +170,13 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
-                <Clock className="w-4 h-4" />
-                <span>
+              <div className="flex items-center gap-2 text-sm pt-2 border-t">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-muted-foreground">
                   Ingresó {formatDistanceToNow(new Date(admission.fechaIngreso), { addSuffix: true, locale: es })}
                 </span>
-                <span className="ml-auto font-medium">
-                  Esperando: {getWaitingTime(admission)} min
+                <span className={`ml-auto ${getWaitingTimeColor(admission)}`}>
+                  ⏱️ {formatWaitingTime(getWaitingTime(admission))}
                 </span>
               </div>
             </div>
