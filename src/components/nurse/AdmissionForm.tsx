@@ -18,7 +18,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [patientCuil, setPatientCuil] = useState('');
-  
+
   const [formData, setFormData] = useState<CreateAdmissionData>({
     cuil: '',
     informe: '',
@@ -51,6 +51,15 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       return;
     }
 
+    if (!formData.tensionArterial || !/^\d{1,3}\/\d{1,3}$/.test(formData.tensionArterial)) {
+      toast({
+        title: 'Error de validación',
+        description: 'El campo Tensión Arterial debe tener el formato sistólica/diastólica (ejemplo: 120/80)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (formData.frecCardiaca < 0 || formData.frecRespiratoria < 0 || formData.temperatura < 0) {
       toast({
         title: 'Error de validación',
@@ -60,6 +69,17 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
       return;
     }
 
+    if (formData.frecCardiaca > 999 || formData.frecRespiratoria > 999 || formData.temperatura > 999) {
+      toast({
+        title: 'Error de validación',
+        description: 'Frec. Cardíaca, Frec. Respiratoria y Temperatura solo pueden tener hasta 3 dígitos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+
+
     setIsLoading(true);
 
     try {
@@ -68,32 +88,38 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
         cuil: patientCuil,
       };
 
-      // TODO: Descomentar cuando conectes el backend
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${user?.token}`,
-      //   },
-      //   body: JSON.stringify(admissionData),
-      // });
-      //
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   if (response.status === 400 && errorData.message?.includes('paciente')) {
-      //     toast({
-      //       title: "Paciente no registrado",
-      //       description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero en la pestaña 'Registrar Paciente'.",
-      //       variant: "destructive",
-      //     });
-      //     setIsLoading(false);
-      //     return;
-      //   }
-      //   throw new Error('Error al registrar el ingreso');
-      // }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify(admissionData),
+      });
 
-      // Simulación de éxito
-      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (!response.ok) {
+        if (response.status === 400) {
+
+          if ((await response.json()).message.includes('Paciente')) {
+            toast({
+              title: "Paciente no registrado",
+              description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero en la pestaña 'Registrar Paciente'.",
+              variant: "destructive",
+            });
+          }
+          else if ((await response.json()).message.includes('Enfermera')) {
+            toast({
+              title: "Enfermera no registrada",
+              description: "Enfermera Logeada no encontrada",
+              variant: "destructive",
+            });
+          }
+          setIsLoading(false);
+          return;
+        }
+        throw new Error('Error al registrar el ingreso');
+      }
 
       toast({
         title: 'Éxito',
@@ -116,7 +142,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'No se pudo registrar el ingreso',
+        description: 'No se pudo registrar el ingreso, intente nuevamente más tarde...',
         variant: 'destructive',
       });
     } finally {

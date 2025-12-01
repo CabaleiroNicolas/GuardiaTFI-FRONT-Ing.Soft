@@ -16,7 +16,7 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [patientData, setPatientData] = useState<CreatePatientData>({
     cuil: '',
     apellido: '',
@@ -30,7 +30,7 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validaciones básicas
     if (!patientData.cuil || patientData.cuil.length !== 11) {
       toast({
@@ -53,20 +53,27 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
     setIsLoading(true);
 
     try {
-       const response = await fetch(`${import.meta.env.VITE_API_URL}/pacientes`, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-           'Authorization': `Bearer ${user?.token}`,
-         },
-         body: JSON.stringify(patientData),
-       });
-      
-       if (!response.ok) {
-         throw new Error((await response.json()).message || 'Error al registrar el paciente');
-       }
-      
-       const data = await response.json();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/pacientes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify(patientData),
+      });
+
+      if (!response.ok) {
+        if (response.status === 400 && (await response.json()).message.includes('Paciente')) {
+          toast({
+            title: "Paciente ya registrado",
+            description: "El CUIL ingresado ya corresponde a un paciente registrado.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      const data = await response.json();
 
       toast({
         title: "Paciente registrado",
@@ -89,7 +96,7 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
     } catch (error) {
       toast({
         title: "Error",
-        description: "El paciente ya se encuentra registrado",
+        description: "Error al registrar el paciente. Intente nuevamente más tarde.",
         variant: "destructive",
       });
     } finally {
