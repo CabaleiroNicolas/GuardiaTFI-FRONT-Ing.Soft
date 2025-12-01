@@ -73,8 +73,6 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
         }
       }
 
-      const data = await response.json();
-
       toast({
         title: "Paciente registrado",
         description: `${patientData.nombre} ${patientData.apellido} ha sido registrado exitosamente`,

@@ -95,18 +95,28 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
         body: JSON.stringify(admissionData),
       });
 
-
       if (!response.ok) {
         if (response.status === 400) {
 
-          if ((await response.json()).message.includes('Paciente')) {
+          const message = (await response.json()).message;
+
+          if (message.includes('No se encontró el Paciente')) {
             toast({
               title: "Paciente no registrado",
               description: "El CUIL ingresado no corresponde a un paciente registrado. Registra al paciente primero en la pestaña 'Registrar Paciente'.",
               variant: "destructive",
             });
           }
-          else if ((await response.json()).message.includes('Enfermera')) {
+
+          else if (message.includes('El Paciente ya tiene un ingreso pendiente')) {
+            toast({
+              title: "Paciente con ingreso pendiente",
+              description: "El paciente ya tiene un ingreso pendiente en urgencias.",
+              variant: "destructive",
+            });
+          }
+
+          else if (message.includes('Enfermera')) {
             toast({
               title: "Enfermera no registrada",
               description: "Enfermera Logeada no encontrada",
