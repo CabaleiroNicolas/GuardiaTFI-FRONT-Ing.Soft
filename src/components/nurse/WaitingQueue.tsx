@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Admission, EMERGENCY_LEVELS } from '@/types/emergency';
+import { Admission, EMERGENCY_LEVELS, BackendAdmissionResponse, mapBackendAdmissionToAdmission } from '@/types/emergency';
 import { useAuth } from '@/contexts/AuthContext';
 import { Clock, AlertTriangle, Activity, Thermometer } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,70 +23,19 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
 
   const fetchAdmissions = async () => {
     try {
-      // TODO: Replace with actual API call
-       const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
-         headers: {
-           'Authorization': `Bearer ${user?.token}`,
-         },
-       });
-       
-       if (!response.ok) {
-         throw new Error('Error al cargar la cola de espera');
-       }
-       
-       const data = await response.json();
-       setAdmissions(data);
-
-      // Mock data for development
-      /* const mockAdmissions: Admission[] = [
-        {
-          id: '1',
-          patientId: 'P001',
-          patientName: 'Juan Pérez',
-          fechaIngreso: new Date(Date.now() - 30 * 60000), // 30 min ago
-          informe: 'Dolor torácico intenso',
-          nivelEmergencia: 'EMERGENCIA',
-          estado: 'PENDIENTE',
-          temperatura: 37.2,
-          frecCardiaca: 110,
-          frecRespiratoria: 22,
-          tensionArterial: '150/95',
-          enfermeraId: 'E001',
-          enfermeraNombre: 'María García',
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
         },
-        {
-          id: '2',
-          patientId: 'P002',
-          patientName: 'Ana Martínez',
-          fechaIngreso: new Date(Date.now() - 70 * 60000), // 70 min ago
-          informe: 'Fractura en brazo derecho',
-          nivelEmergencia: 'URGENCIA',
-          estado: 'PENDIENTE',
-          temperatura: 36.8,
-          frecCardiaca: 85,
-          frecRespiratoria: 18,
-          tensionArterial: '120/80',
-          enfermeraId: 'E001',
-          enfermeraNombre: 'María García',
-        },
-        {
-          id: '3',
-          patientId: 'P003',
-          patientName: 'Carlos López',
-          fechaIngreso: new Date(Date.now() - 10 * 60000), // 10 min ago
-          informe: 'Fiebre alta y malestar general',
-          nivelEmergencia: 'URGENCIA_MENOR',
-          estado: 'PENDIENTE',
-          temperatura: 38.5,
-          frecCardiaca: 92,
-          frecRespiratoria: 20,
-          tensionArterial: '115/75',
-          enfermeraId: 'E002',
-          enfermeraNombre: 'Laura Rodríguez',
-        },
-      ];
- */
-      //setAdmissions(mockAdmissions);
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar la cola de espera');
+      }
+      
+      const backendData: BackendAdmissionResponse[] = await response.json();
+      const mappedAdmissions = backendData.map(mapBackendAdmissionToAdmission);
+      setAdmissions(mappedAdmissions);
     } catch (error) {
       console.error('Error fetching admissions:', error);
     } finally {
