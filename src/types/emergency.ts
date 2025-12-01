@@ -107,16 +107,31 @@ export interface BackendAdmissionResponse {
 
 // Helper function to map backend response to frontend Admission type
 export const mapBackendAdmissionToAdmission = (backendAdmission: BackendAdmissionResponse): Admission => {
-  // Map nivelEmergencia string to EmergencyLevel
-  const emergencyLevelMap: Record<string, EmergencyLevel> = {
-    'Crítica': 'CRITICA',
-    'Emergencia': 'EMERGENCIA',
-    'Urgencia': 'URGENCIA',
-    'Urgencia Menor': 'URGENCIA_MENOR',
-    'Sin Urgencia': 'SIN_URGENCIA',
+  // Normalize the emergency level string to handle variations
+  const normalizeEmergencyLevel = (level: string): EmergencyLevel => {
+    const normalized = level.toLowerCase().trim();
+    
+    if (normalized.includes('critica') || normalized.includes('critico')) {
+      return 'CRITICA';
+    }
+    if (normalized === 'emergencia') {
+      return 'EMERGENCIA';
+    }
+    if (normalized === 'urgencia menor') {
+      return 'URGENCIA_MENOR';
+    }
+    if (normalized === 'urgencia') {
+      return 'URGENCIA';
+    }
+    if (normalized === 'sin urgencia') {
+      return 'SIN_URGENCIA';
+    }
+    
+    // Default fallback
+    return 'SIN_URGENCIA';
   };
 
-  const nivelEmergencia = emergencyLevelMap[backendAdmission.nivelEmergencia] || 'SIN_URGENCIA';
+  const nivelEmergencia = normalizeEmergencyLevel(backendAdmission.nivelEmergencia);
 
   return {
     id: backendAdmission.paciente.cuil, // Using CUIL as ID since backend doesn't provide admission ID
