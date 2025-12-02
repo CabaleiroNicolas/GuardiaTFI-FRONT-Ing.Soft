@@ -170,7 +170,7 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-sm pt-2 border-t">
+              {/* <div className="flex items-center gap-2 text-sm pt-2 border-t">
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 <span className="text-muted-foreground">
                   Ingresó {formatDistanceToNow(new Date(admission.fechaIngreso), { addSuffix: true, locale: es })}
@@ -178,7 +178,7 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
                 <span className={`ml-auto ${getWaitingTimeColor(admission)}`}>
                   ⏱️ {formatWaitingTime(getWaitingTime(admission))}
                 </span>
-              </div>
+              </div> */}
             </div>
           ))
         )}

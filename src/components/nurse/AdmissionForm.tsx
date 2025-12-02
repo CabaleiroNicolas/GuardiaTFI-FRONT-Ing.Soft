@@ -214,7 +214,6 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
               <Input
                 id="frecCardiaca"
                 type="number"
-                min="0"
                 step="0.1"
                 placeholder="70"
                 value={formData.frecCardiaca || ''}
@@ -228,7 +227,6 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
               <Input
                 id="frecRespiratoria"
                 type="number"
-                min="0"
                 step="0.1"
                 placeholder="16"
                 value={formData.frecRespiratoria || ''}
