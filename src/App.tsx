@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Auth from "./pages/Auth";
 import NurseDashboard from "./pages/NurseDashboard";
+import DoctorDashboard from "./pages/DoctorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const RoleBasedDashboard = () => {
+  const { user } = useAuth();
+
+  if (user?.role === 'MEDICO') {
+    return <DoctorDashboard />;
+  }
+
+  return <NurseDashboard />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -37,7 +48,7 @@ const App = () => (
               path="/"
               element={
                 <ProtectedRoute>
-                  <NurseDashboard />
+                  <RoleBasedDashboard />
                 </ProtectedRoute>
               }
             />
