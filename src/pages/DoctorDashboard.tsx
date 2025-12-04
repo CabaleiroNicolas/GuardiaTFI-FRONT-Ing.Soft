@@ -10,10 +10,15 @@ import { LogOut, Activity, UserCheck, History } from 'lucide-react';
 const DoctorDashboard = () => {
   const { user, logout } = useAuth();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [queueCount, setQueueCount] = useState<number>(0);
 
   const handleAttentionComplete = () => {
     // Recargar la cola de espera cuando se complete una atención
     setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleQueueCountChange = (count: number) => {
+    setQueueCount(count);
   };
 
   return (
@@ -62,10 +67,16 @@ const DoctorDashboard = () => {
           <TabsContent value="attend">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <div>
-                <AttendPatient onAttentionComplete={handleAttentionComplete} />
+                <AttendPatient 
+                  onAttentionComplete={handleAttentionComplete} 
+                  queueCount={queueCount}
+                />
               </div>
               <div>
-                <WaitingQueue refreshTrigger={refreshTrigger} />
+                <WaitingQueue 
+                  refreshTrigger={refreshTrigger} 
+                  onQueueCountChange={handleQueueCountChange}
+                />
               </div>
             </div>
           </TabsContent>

@@ -13,9 +13,10 @@ import { differenceInMinutes } from 'date-fns';
 
 interface AttendPatientProps {
   onAttentionComplete: () => void;
+  queueCount: number;
 }
 
-export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
+export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatientProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claimedPatient, setClaimedPatient] = useState<Admission | null>(null);
@@ -225,6 +226,8 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
     setInforme('');
   };
 
+  const hasPatients = queueCount > 0;
+
   if (!claimedPatient) {
     return (
       <Card>
@@ -234,21 +237,36 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
             Atender Paciente
           </CardTitle>
           <CardDescription>
-            Reclame el próximo paciente en la lista de espera para comenzar la atención
+            {hasPatients 
+              ? 'Reclame el próximo paciente en la lista de espera para comenzar la atención'
+              : 'No hay pacientes en la cola de espera'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
-          <div className="text-center text-muted-foreground mb-4">
-            <p>No hay paciente en atención actualmente.</p>
-            <p className="text-sm">Presione el botón para reclamar el próximo paciente.</p>
-          </div>
-          <Button 
-            size="lg" 
-            onClick={handleClaimNextPatient}
-            disabled={isClaimingPatient}
-          >
-            {isClaimingPatient ? 'Reclamando...' : 'Atender Próximo Paciente'}
-          </Button>
+          {hasPatients ? (
+            <>
+              <div className="text-center text-muted-foreground mb-4">
+                <p>No hay paciente en atención actualmente.</p>
+                <p className="text-sm">Hay {queueCount} paciente(s) esperando. Presione el botón para reclamar el próximo.</p>
+              </div>
+              <Button 
+                size="lg" 
+                onClick={handleClaimNextPatient}
+                disabled={isClaimingPatient}
+              >
+                {isClaimingPatient ? 'Reclamando...' : 'Atender Próximo Paciente'}
+              </Button>
+            </>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserCheck className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="font-medium">No hay pacientes en espera</p>
+              <p className="text-sm">La cola de espera está vacía. Los nuevos ingresos aparecerán automáticamente.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
