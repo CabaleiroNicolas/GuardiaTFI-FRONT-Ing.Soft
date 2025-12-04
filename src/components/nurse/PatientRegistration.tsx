@@ -41,6 +41,15 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
       return;
     }
 
+    if (!patientData.cuil || !/^(20|27)\d{8}\d$/.test(patientData.cuil)) {
+      toast({
+        title: "Error de validación",
+        description: "El CUIL es inválido (Debe tener 11 dígitos y comenzar con 20 o 27)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!patientData.nombre || !patientData.apellido) {
       toast({
         title: "Error de validación",
