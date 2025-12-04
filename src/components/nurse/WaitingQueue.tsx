@@ -10,9 +10,10 @@ import { es } from 'date-fns/locale';
 
 interface WaitingQueueProps {
   refreshTrigger: number;
+  onQueueCountChange?: (count: number) => void;
 }
 
-export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
+export const WaitingQueue = ({ refreshTrigger, onQueueCountChange }: WaitingQueueProps) => {
   const { user } = useAuth();
   const [admissions, setAdmissions] = useState<Admission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +37,7 @@ export const WaitingQueue = ({ refreshTrigger }: WaitingQueueProps) => {
       const backendData: BackendAdmissionResponse[] = await response.json();
       const mappedAdmissions = backendData.map(mapBackendAdmissionToAdmission);
       setAdmissions(mappedAdmissions);
+      onQueueCountChange?.(mappedAdmissions.length);
     } catch (error) {
       console.error('Error fetching admissions:', error);
     } finally {
