@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { ClaimedPatient, mapBackendClaimedPatient } from '@/types/attention';
-import { EMERGENCY_LEVELS, EmergencyLevel } from '@/types/emergency';
-import { UserCheck, Activity, Thermometer, FileText, Send, AlertCircle } from 'lucide-react';
+import { Admission, BackendAdmissionResponse, mapBackendAdmissionToAdmission, EMERGENCY_LEVELS } from '@/types/emergency';
+import { UserCheck, Activity, Thermometer, FileText, CheckCircle, AlertCircle, Clock, User } from 'lucide-react';
+import { differenceInMinutes } from 'date-fns';
 
 interface AttendPatientProps {
   onAttentionComplete: () => void;
@@ -18,26 +18,61 @@ interface AttendPatientProps {
 export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [claimedPatient, setClaimedPatient] = useState<ClaimedPatient | null>(null);
+  const [claimedPatient, setClaimedPatient] = useState<Admission | null>(null);
   const [isClaimingPatient, setIsClaimingPatient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [informe, setInforme] = useState('');
 
+  const formatWaitingTime = (fechaIngreso: Date): string => {
+    const now = new Date();
+    const minutes = differenceInMinutes(now, fechaIngreso);
+    
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (remainingMinutes === 0) {
+      return `${hours}h`;
+    }
+    
+    return `${hours}h ${remainingMinutes}min`;
+  };
+
+  const getWaitingTimeColor = (fechaIngreso: Date, nivelEmergencia: string): string => {
+    const now = new Date();
+    const minutes = differenceInMinutes(now, fechaIngreso);
+    const levelInfo = EMERGENCY_LEVELS[nivelEmergencia as keyof typeof EMERGENCY_LEVELS];
+    
+    if (!levelInfo) return 'text-muted-foreground';
+    
+    const maxWait = levelInfo.maxWaitTime;
+    const percentageUsed = (minutes / maxWait) * 100;
+    
+    if (percentageUsed >= 100) {
+      return 'text-destructive font-semibold';
+    }
+    if (percentageUsed >= 75) {
+      return 'text-warning font-medium';
+    }
+    return 'text-muted-foreground';
+  };
+
   const getLevelBadgeColor = (level: string) => {
-    const normalizedLevel = level.toLowerCase().trim();
-    if (normalizedLevel.includes('critica') || normalizedLevel.includes('critico')) {
-      return 'bg-critical text-critical-foreground';
-    }
-    if (normalizedLevel === 'emergencia') {
-      return 'bg-emergency text-emergency-foreground';
-    }
-    if (normalizedLevel === 'urgencia menor') {
-      return 'bg-minor text-minor-foreground';
-    }
-    if (normalizedLevel === 'urgencia') {
-      return 'bg-urgent text-urgent-foreground';
-    }
-    return 'bg-routine text-routine-foreground';
+    const levelInfo = EMERGENCY_LEVELS[level as keyof typeof EMERGENCY_LEVELS];
+    if (!levelInfo) return 'bg-routine text-routine-foreground';
+    
+    const colorMap = {
+      critical: 'bg-critical text-critical-foreground',
+      emergency: 'bg-emergency text-emergency-foreground',
+      urgent: 'bg-urgent text-urgent-foreground',
+      minor: 'bg-minor text-minor-foreground',
+      routine: 'bg-routine text-routine-foreground',
+    };
+    
+    return colorMap[levelInfo.color];
   };
 
   const handleClaimNextPatient = async () => {
@@ -45,7 +80,7 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
     try {
       // TODO: Reemplazar con endpoint real
       // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
-      //   method: 'POST',
+      //   method: 'PATCH',
       //   headers: {
       //     'Authorization': `Bearer ${user?.token}`,
       //     'Content-Type': 'application/json',
@@ -59,29 +94,58 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
       //   throw new Error('Error al reclamar paciente');
       // }
       // 
-      // const backendData = await response.json();
-      // const mappedPatient = mapBackendClaimedPatient(backendData);
+      // const backendData: BackendAdmissionResponse = await response.json();
+      // const mappedPatient = mapBackendAdmissionToAdmission(backendData);
       // setClaimedPatient(mappedPatient);
 
-      // Datos hardcodeados para pruebas
-      const mockClaimedPatient: ClaimedPatient = {
-        ingresoId: 'ing-001',
-        patientId: '20123456781',
-        patientName: 'Juan Pérez',
-        cuil: '20123456781',
-        fechaIngreso: new Date(),
+      // Datos hardcodeados para pruebas (mismo formato que la cola de espera)
+      const mockBackendResponse: BackendAdmissionResponse = {
+        enfermera: {
+          email: 'enfermera@test.com',
+          password: '',
+          role: 'ENFERMERA',
+          cuil: '27123456789',
+          apellido: 'García',
+          nombre: 'María',
+        },
+        estado: 'PENDIENTE',
+        fechaIngreso: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 min ago
+        informe: 'Paciente con dolor abdominal intenso localizado en fosa ilíaca derecha',
         nivelEmergencia: 'Urgencia',
-        informeIngreso: 'Paciente con dolor abdominal intenso',
-        temperatura: 37.5,
-        frecCardiaca: 85,
-        frecRespiratoria: 18,
-        tensionArterial: '120/80',
+        paciente: {
+          apellido: 'Pérez',
+          cuil: '20123456781',
+          domicilio: {
+            calle: 'Av. Siempre Viva',
+            numero: '742',
+            localidad: 'Springfield',
+          },
+          nombre: 'Juan Carlos',
+          obraSocial: {
+            numeroAfiliado: '12345678',
+            obraSocial: {
+              id: 1,
+              nombre: 'OSDE',
+            },
+          },
+        },
+        signosVitales: {
+          frecCardiaca: '85',
+          frecRespiratoria: '18',
+          temperatura: '37.5',
+          tensionArterial: {
+            frecDiastolica: '80',
+            frecSistolica: '120',
+          },
+        },
       };
       
-      setClaimedPatient(mockClaimedPatient);
+      const mappedPatient = mapBackendAdmissionToAdmission(mockBackendResponse);
+      setClaimedPatient(mappedPatient);
+      
       toast({
         title: 'Paciente reclamado',
-        description: `Ahora está atendiendo a ${mockClaimedPatient.patientName}`,
+        description: `Ahora está atendiendo a ${mappedPatient.patientName}`,
       });
     } catch (error: any) {
       if (error.message === 'NO_PATIENTS') {
@@ -102,7 +166,7 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
     }
   };
 
-  const handleSubmitAttention = async () => {
+  const handleMarkAsAttended = async () => {
     if (!informe.trim()) {
       toast({
         title: 'Error de validación',
@@ -124,7 +188,7 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
       //     'Content-Type': 'application/json',
       //   },
       //   body: JSON.stringify({
-      //     ingresoId: claimedPatient.ingresoId,
+      //     ingresoId: claimedPatient.id,
       //     informe: informe.trim(),
       //   }),
       // });
@@ -190,6 +254,8 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
     );
   }
 
+  const levelInfo = EMERGENCY_LEVELS[claimedPatient.nivelEmergencia];
+
   return (
     <Card>
       <CardHeader>
@@ -202,42 +268,84 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Información del paciente */}
-        <div className="bg-muted/50 p-4 rounded-lg space-y-4">
+        {/* Información del paciente - mismo estilo que WaitingQueue */}
+        <div className="border rounded-lg p-4 space-y-4">
           <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-semibold text-lg">{claimedPatient.patientName}</h3>
-              <p className="text-sm text-muted-foreground">CUIL: {claimedPatient.cuil}</p>
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-full">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">{claimedPatient.patientName}</h3>
+                <p className="text-sm text-muted-foreground">CUIL: {claimedPatient.patientId}</p>
+              </div>
             </div>
             <Badge className={getLevelBadgeColor(claimedPatient.nivelEmergencia)}>
-              {claimedPatient.nivelEmergencia}
+              {levelInfo?.name || claimedPatient.nivelEmergencia}
             </Badge>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm">
-              <span className="font-medium">Informe de ingreso:</span> {claimedPatient.informeIngreso}
+          {/* Tiempo de espera */}
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Tiempo en espera:</span>
+            <span className={`text-sm ${getWaitingTimeColor(claimedPatient.fechaIngreso, claimedPatient.nivelEmergencia)}`}>
+              {formatWaitingTime(claimedPatient.fechaIngreso)}
+            </span>
+            {levelInfo && (
+              <span className="text-xs text-muted-foreground">
+                (máx. {levelInfo.maxWaitTime} min)
+              </span>
+            )}
+          </div>
+
+          {/* Signos vitales */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-muted/50 p-3 rounded-md">
+            <div className="flex items-center gap-2">
+              <Thermometer className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Temperatura</p>
+                <p className="font-medium">{claimedPatient.temperatura}°C</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Frec. Cardíaca</p>
+                <p className="font-medium">{claimedPatient.frecCardiaca} lpm</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Frec. Respiratoria</p>
+                <p className="font-medium">{claimedPatient.frecRespiratoria} rpm</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">Tensión Arterial</p>
+                <p className="font-medium">{claimedPatient.tensionArterial}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Informe de ingreso */}
+          <div className="space-y-1">
+            <p className="text-sm font-medium flex items-center gap-1">
+              <FileText className="w-4 h-4" />
+              Informe de ingreso:
+            </p>
+            <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
+              {claimedPatient.informe}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div className="flex items-center gap-1">
-              <Activity className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">FC:</span> {claimedPatient.frecCardiaca} lpm
-            </div>
-            <div className="flex items-center gap-1">
-              <Activity className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">FR:</span> {claimedPatient.frecRespiratoria} rpm
-            </div>
-            <div className="flex items-center gap-1">
-              <Activity className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">TA:</span> {claimedPatient.tensionArterial}
-            </div>
-            <div className="flex items-center gap-1">
-              <Thermometer className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">Temp:</span> {claimedPatient.temperatura}°C
-            </div>
-          </div>
+          {/* Enfermera que registró */}
+          <p className="text-xs text-muted-foreground">
+            Registrado por: {claimedPatient.enfermeraNombre}
+          </p>
         </div>
 
         {/* Formulario de atención */}
@@ -245,7 +353,7 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
           <div className="space-y-2">
             <Label htmlFor="informe" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              Informe de Atención *
+              Informe Final de Atención *
             </Label>
             <Textarea
               id="informe"
@@ -261,7 +369,7 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                El informe de atención es obligatorio para finalizar la atención.
+                El informe de atención es obligatorio para marcar como atendido.
               </AlertDescription>
             </Alert>
           )}
@@ -278,15 +386,15 @@ export const AttendPatient = ({ onAttentionComplete }: AttendPatientProps) => {
           </Button>
           <Button 
             className="flex-1"
-            onClick={handleSubmitAttention}
+            onClick={handleMarkAsAttended}
             disabled={isSubmitting || !informe.trim()}
           >
             {isSubmitting ? (
               'Registrando...'
             ) : (
               <>
-                <Send className="w-4 h-4 mr-2" />
-                Confirmar Atención
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Marcar como Atendido
               </>
             )}
           </Button>
