@@ -24,22 +24,29 @@ export const WaitingQueue = ({ refreshTrigger, onQueueCountChange }: WaitingQueu
 
   const fetchAdmissions = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
-        headers: {
-          'Authorization': `Bearer ${user?.token}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Error al cargar la cola de espera');
-      }
-      
-      const backendData: BackendAdmissionResponse[] = await response.json();
-      const mappedAdmissions = backendData.map(mapBackendAdmissionToAdmission);
-      setAdmissions(mappedAdmissions);
-      onQueueCountChange?.(mappedAdmissions.length);
+      // TODO: Reemplazar con endpoint real
+      // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${user?.token}`,
+      //   },
+      // });
+      // 
+      // if (!response.ok) {
+      //   throw new Error('Error al cargar la cola de espera');
+      // }
+      // 
+      // const backendData: BackendAdmissionResponse[] = await response.json();
+      // const mappedAdmissions = backendData.map(mapBackendAdmissionToAdmission);
+      // setAdmissions(mappedAdmissions);
+      // onQueueCountChange?.(mappedAdmissions.length);
+
+      // Datos hardcodeados para pruebas (array vacío = sin pacientes)
+      const mockAdmissions: Admission[] = [];
+      setAdmissions(mockAdmissions);
+      onQueueCountChange?.(mockAdmissions.length);
     } catch (error) {
       console.error('Error fetching admissions:', error);
+      onQueueCountChange?.(0);
     } finally {
       setIsLoading(false);
     }
