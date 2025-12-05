@@ -65,6 +65,7 @@ export interface CreateAdmissionData {
 
 // Backend response interfaces
 export interface BackendAdmissionResponse {
+  id: number;
   enfermera: {
     email: string;
     password: string;
@@ -134,7 +135,7 @@ export const mapBackendAdmissionToAdmission = (backendAdmission: BackendAdmissio
   const nivelEmergencia = normalizeEmergencyLevel(backendAdmission.nivelEmergencia);
 
   return {
-    id: backendAdmission.paciente.cuil, // Using CUIL as ID since backend doesn't provide admission ID
+    id: String(backendAdmission.id),
     patientId: backendAdmission.paciente.cuil,
     patientName: `${backendAdmission.paciente.nombre} ${backendAdmission.paciente.apellido}`,
     fechaIngreso: new Date(backendAdmission.fechaIngreso),
