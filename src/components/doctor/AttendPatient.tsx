@@ -118,7 +118,6 @@ export const AttendPatient = ({ onAttentionComplete, onPatientClaimed, queueCoun
     setIsClaimingPatient(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
-        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${user?.token}`,
           'Content-Type': 'application/json',
