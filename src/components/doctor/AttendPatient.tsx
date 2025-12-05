@@ -79,70 +79,24 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   const handleClaimNextPatient = async () => {
     setIsClaimingPatient(true);
     try {
-      // TODO: Reemplazar con endpoint real
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
-      //   method: 'PATCH',
-      //   headers: {
-      //     'Authorization': `Bearer ${user?.token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
-      // 
-      // if (!response.ok) {
-      //   if (response.status === 404) {
-      //     throw new Error('NO_PATIENTS');
-      //   }
-      //   throw new Error('Error al reclamar paciente');
-      // }
-      // 
-      // const backendData: BackendAdmissionResponse = await response.json();
-      // const mappedPatient = mapBackendAdmissionToAdmission(backendData);
-      // setClaimedPatient(mappedPatient);
-
-      // Datos hardcodeados para pruebas (mismo formato que la cola de espera)
-      const mockBackendResponse: BackendAdmissionResponse = {
-        enfermera: {
-          email: 'enfermera@test.com',
-          password: '',
-          role: 'ENFERMERA',
-          cuil: '27123456789',
-          apellido: 'García',
-          nombre: 'María',
-        },
-        estado: 'PENDIENTE',
-        fechaIngreso: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 min ago
-        informe: 'Paciente con dolor abdominal intenso localizado en fosa ilíaca derecha',
-        nivelEmergencia: 'Urgencia',
-        paciente: {
-          apellido: 'Pérez',
-          cuil: '20123456781',
-          domicilio: {
-            calle: 'Av. Siempre Viva',
-            numero: '742',
-            localidad: 'Springfield',
-          },
-          nombre: 'Juan Carlos',
-          obraSocial: {
-            numeroAfiliado: '12345678',
-            obraSocial: {
-              id: 1,
-              nombre: 'OSDE',
-            },
-          },
-        },
-        signosVitales: {
-          frecCardiaca: '85',
-          frecRespiratoria: '18',
-          temperatura: '37.5',
-          tensionArterial: {
-            frecDiastolica: '80',
-            frecSistolica: '120',
-          },
-        },
-      };
-      
-      const mappedPatient = mapBackendAdmissionToAdmission(mockBackendResponse);
-      setClaimedPatient(mappedPatient);
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
+         method: 'PATCH',
+         headers: {
+           'Authorization': `Bearer ${user?.token}`,
+           'Content-Type': 'application/json',
+         },
+       });
+       
+       if (!response.ok) {
+         if (response.status === 404) {
+           throw new Error('NO_PATIENTS');
+         }
+         throw new Error('Error al reclamar paciente');
+       }
+       
+       const backendData: BackendAdmissionResponse = await response.json();
+       const mappedPatient = mapBackendAdmissionToAdmission(backendData);
+       setClaimedPatient(mappedPatient);
       
       toast({
         title: 'Paciente reclamado',
