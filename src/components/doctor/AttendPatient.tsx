@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Admission, BackendAdmissionResponse, mapBackendAdmissionToAdmission, EMERGENCY_LEVELS } from '@/types/emergency';
-import { UserCheck, Activity, Thermometer, FileText, CheckCircle, AlertCircle, Clock, User } from 'lucide-react';
+import { UserCheck, Activity, Thermometer, FileText, CheckCircle, AlertCircle, Clock, User, Loader2 } from 'lucide-react';
 import { differenceInMinutes } from 'date-fns';
 
 interface AttendPatientProps {
@@ -22,7 +22,55 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   const [claimedPatient, setClaimedPatient] = useState<Admission | null>(null);
   const [isClaimingPatient, setIsClaimingPatient] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingClaimed, setIsLoadingClaimed] = useState(true);
   const [informe, setInforme] = useState('');
+
+  // Verificar si hay un paciente previamente reclamado al cargar
+  useEffect(() => {
+    const fetchClaimedPatient = async () => {
+      try {
+        // TODO: Reemplazar con endpoint real
+        // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamado`, {
+        //   headers: {
+        //     'Authorization': `Bearer ${user?.token}`,
+        //   },
+        // });
+        // 
+        // if (!response.ok) {
+        //   throw new Error('Error al verificar paciente reclamado');
+        // }
+        // 
+        // const data = await response.json();
+        // 
+        // if (data) {
+        //   const mappedPatient = mapBackendAdmissionToAdmission(data as BackendAdmissionResponse);
+        //   setClaimedPatient(mappedPatient);
+        //   toast({
+        //     title: 'Paciente en proceso',
+        //     description: `Tiene un paciente pendiente de atención: ${mappedPatient.patientName}`,
+        //   });
+        // }
+
+        // Simular respuesta null (sin paciente reclamado previamente)
+        const mockResponse: BackendAdmissionResponse | null = null;
+        
+        if (mockResponse) {
+          const mappedPatient = mapBackendAdmissionToAdmission(mockResponse);
+          setClaimedPatient(mappedPatient);
+          toast({
+            title: 'Paciente en proceso',
+            description: `Tiene un paciente pendiente de atención: ${mappedPatient.patientName}`,
+          });
+        }
+      } catch (error) {
+        console.error('Error al verificar paciente reclamado:', error);
+      } finally {
+        setIsLoadingClaimed(false);
+      }
+    };
+
+    fetchClaimedPatient();
+  }, [user?.token]);
 
   const formatWaitingTime = (fechaIngreso: Date): string => {
     const now = new Date();
@@ -227,6 +275,27 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   };
 
   const hasPatients = queueCount > 0;
+
+  // Mostrar loader mientras se verifica si hay paciente reclamado
+  if (isLoadingClaimed) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5" />
+            Atender Paciente
+          </CardTitle>
+          <CardDescription>
+            Verificando pacientes en proceso...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Cargando...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!claimedPatient) {
     return (
