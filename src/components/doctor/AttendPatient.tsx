@@ -29,39 +29,28 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   useEffect(() => {
     const fetchClaimedPatient = async () => {
       try {
-        // TODO: Reemplazar con endpoint real
-        // const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamado`, {
-        //   headers: {
-        //     'Authorization': `Bearer ${user?.token}`,
-        //   },
-        // });
-        // 
-        // if (!response.ok) {
-        //   throw new Error('Error al verificar paciente reclamado');
-        // }
-        // 
-        // const data = await response.json();
-        // 
-        // if (data) {
-        //   const mappedPatient = mapBackendAdmissionToAdmission(data as BackendAdmissionResponse);
-        //   setClaimedPatient(mappedPatient);
-        //   toast({
-        //     title: 'Paciente en proceso',
-        //     description: `Tiene un paciente pendiente de atención: ${mappedPatient.patientName}`,
-        //   });
-        // }
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamado`, {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`,
+          },
+        });
 
-        // Simular respuesta null (sin paciente reclamado previamente)
-        const mockResponse: BackendAdmissionResponse | null = null;
-        
-        if (mockResponse) {
-          const mappedPatient = mapBackendAdmissionToAdmission(mockResponse);
+        if (!response.ok) {
+          throw new Error('Error al verificar paciente reclamado');
+        }
+
+        const data = await response.json();
+
+        console.log(response)
+        if (data) {
+          const mappedPatient = mapBackendAdmissionToAdmission(data as BackendAdmissionResponse);
           setClaimedPatient(mappedPatient);
           toast({
             title: 'Paciente en proceso',
             description: `Tiene un paciente pendiente de atención: ${mappedPatient.patientName}`,
           });
         }
+
       } catch (error) {
         console.error('Error al verificar paciente reclamado:', error);
       } finally {
@@ -75,18 +64,18 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   const formatWaitingTime = (fechaIngreso: Date): string => {
     const now = new Date();
     const minutes = differenceInMinutes(now, fechaIngreso);
-    
+
     if (minutes < 60) {
       return `${minutes} min`;
     }
-    
+
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     if (remainingMinutes === 0) {
       return `${hours}h`;
     }
-    
+
     return `${hours}h ${remainingMinutes}min`;
   };
 
@@ -94,12 +83,12 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
     const now = new Date();
     const minutes = differenceInMinutes(now, fechaIngreso);
     const levelInfo = EMERGENCY_LEVELS[nivelEmergencia as keyof typeof EMERGENCY_LEVELS];
-    
+
     if (!levelInfo) return 'text-muted-foreground';
-    
+
     const maxWait = levelInfo.maxWaitTime;
     const percentageUsed = (minutes / maxWait) * 100;
-    
+
     if (percentageUsed >= 100) {
       return 'text-destructive font-semibold';
     }
@@ -112,7 +101,7 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
   const getLevelBadgeColor = (level: string) => {
     const levelInfo = EMERGENCY_LEVELS[level as keyof typeof EMERGENCY_LEVELS];
     if (!levelInfo) return 'bg-routine text-routine-foreground';
-    
+
     const colorMap = {
       critical: 'bg-critical text-critical-foreground',
       emergency: 'bg-emergency text-emergency-foreground',
@@ -120,32 +109,32 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
       minor: 'bg-minor text-minor-foreground',
       routine: 'bg-routine text-routine-foreground',
     };
-    
+
     return colorMap[levelInfo.color];
   };
 
   const handleClaimNextPatient = async () => {
     setIsClaimingPatient(true);
     try {
-       const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
-         method: 'PATCH',
-         headers: {
-           'Authorization': `Bearer ${user?.token}`,
-           'Content-Type': 'application/json',
-         },
-       });
-       
-       if (!response.ok) {
-         if (response.status === 404) {
-           throw new Error('NO_PATIENTS');
-         }
-         throw new Error('Error al reclamar paciente');
-       }
-       
-       const backendData: BackendAdmissionResponse = await response.json();
-       const mappedPatient = mapBackendAdmissionToAdmission(backendData);
-       setClaimedPatient(mappedPatient);
-      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/reclamar`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('NO_PATIENTS');
+        }
+        throw new Error('Error al reclamar paciente');
+      }
+
+      const backendData: BackendAdmissionResponse = await response.json();
+      const mappedPatient = mapBackendAdmissionToAdmission(backendData);
+      setClaimedPatient(mappedPatient);
+
       toast({
         title: 'Paciente reclamado',
         description: `Ahora está atendiendo a ${mappedPatient.patientName}`,
@@ -260,7 +249,7 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
             Atender Paciente
           </CardTitle>
           <CardDescription>
-            {hasPatients 
+            {hasPatients
               ? 'Reclame el próximo paciente en la lista de espera para comenzar la atención'
               : 'No hay pacientes en la cola de espera'
             }
@@ -273,8 +262,8 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
                 <p>No hay paciente en atención actualmente.</p>
                 <p className="text-sm">Hay {queueCount} paciente(s) esperando. Presione el botón para reclamar el próximo.</p>
               </div>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={handleClaimNextPatient}
                 disabled={isClaimingPatient}
               >
@@ -418,14 +407,14 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
 
         {/* Botones de acción */}
         <div className="flex gap-3 pt-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleCancelAttention}
             disabled={isSubmitting}
           >
             Cancelar
           </Button>
-          <Button 
+          <Button
             className="flex-1"
             onClick={handleMarkAsAttended}
             disabled={isSubmitting || !informe.trim()}
