@@ -176,25 +176,21 @@ export const AttendPatient = ({ onAttentionComplete, onPatientClaimed, queueCoun
 
     setIsSubmitting(true);
     try {
-      // TODO: Reemplazar con endpoint real
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/atenciones`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${user?.token}`,
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     ingresoId: claimedPatient.id,
-      //     informe: informe.trim(),
-      //   }),
-      // });
-      // 
-      // if (!response.ok) {
-      //   throw new Error('Error al registrar atención');
-      // }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/urgencias/atencion`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ingresoId: claimedPatient.id,
+          informe: informe.trim(),
+        }),
+      });
 
-      // Simular éxito
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (!response.ok) {
+        throw new Error('Error al registrar atención');
+      }
 
       toast({
         title: 'Atención registrada',
