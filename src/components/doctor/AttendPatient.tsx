@@ -13,10 +13,11 @@ import { differenceInMinutes } from 'date-fns';
 
 interface AttendPatientProps {
   onAttentionComplete: () => void;
+  onPatientClaimed: () => void;
   queueCount: number;
 }
 
-export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatientProps) => {
+export const AttendPatient = ({ onAttentionComplete, onPatientClaimed, queueCount }: AttendPatientProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claimedPatient, setClaimedPatient] = useState<Admission | null>(null);
@@ -134,6 +135,9 @@ export const AttendPatient = ({ onAttentionComplete, queueCount }: AttendPatient
       const backendData: BackendAdmissionResponse = await response.json();
       const mappedPatient = mapBackendAdmissionToAdmission(backendData);
       setClaimedPatient(mappedPatient);
+
+      // Refrescar la cola de espera para quitar al paciente reclamado
+      onPatientClaimed();
 
       toast({
         title: 'Paciente reclamado',
