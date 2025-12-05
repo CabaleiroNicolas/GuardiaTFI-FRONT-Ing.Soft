@@ -12,8 +12,8 @@ const DoctorDashboard = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [queueCount, setQueueCount] = useState<number>(0);
 
-  const handleAttentionComplete = () => {
-    // Recargar la cola de espera cuando se complete una atención
+  const handleRefreshQueue = () => {
+    // Recargar la cola de espera
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -68,7 +68,8 @@ const DoctorDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <div>
                 <AttendPatient 
-                  onAttentionComplete={handleAttentionComplete} 
+                  onAttentionComplete={handleRefreshQueue}
+                  onPatientClaimed={handleRefreshQueue}
                   queueCount={queueCount}
                 />
               </div>
