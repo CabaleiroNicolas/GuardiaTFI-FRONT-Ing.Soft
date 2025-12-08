@@ -4,9 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Admission, EMERGENCY_LEVELS, BackendAdmissionResponse, mapBackendAdmissionToAdmission } from '@/types/emergency';
 import { useAuth } from '@/contexts/AuthContext';
-import { Clock, AlertTriangle, Activity, Thermometer } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { AlertTriangle, Activity, Thermometer } from 'lucide-react';
 
 interface WaitingQueueProps {
   refreshTrigger: number;

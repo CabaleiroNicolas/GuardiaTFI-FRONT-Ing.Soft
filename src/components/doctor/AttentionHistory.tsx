@@ -29,6 +29,7 @@ export const AttentionHistory = () => {
         throw new Error('Error al cargar historial de atenciones');
       }
 
+      console.log(response)
       const backendData: BackendAttentionResponse[] = await response.json();
       const mappedAttentions = backendData.map(mapBackendAttention);
       setAttentions(mappedAttentions);
