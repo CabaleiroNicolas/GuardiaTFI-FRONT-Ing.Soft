@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { Attention, BackendAttentionResponse, mapBackendAttention } from '@/types/attention';
 import { History, FileText, Calendar, User, Stethoscope } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 export const AttentionHistory = () => {
@@ -66,10 +66,10 @@ export const AttentionHistory = () => {
         ) : (
           attentions.map((attention) => (
             <div key={attention.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between">
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  {format(attention.fechaAtencion, "dd/MM/yyyy HH:mm", { locale: es })}
+                  {formatInTimeZone(attention.fechaAtencion, 'America/Argentina/Buenos_Aires', "dd/MM/yyyy HH:mm", { locale: es })}
                 </div>
               </div>
 
