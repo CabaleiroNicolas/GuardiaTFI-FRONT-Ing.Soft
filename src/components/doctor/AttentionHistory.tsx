@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { Attention, BackendAttentionResponse, mapBackendAttention } from '@/types/attention';
-import { History, FileText, Calendar, User, Stethoscope } from 'lucide-react';
+import { History, FileText, Calendar, User, Stethoscope, Search, UserRound } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
@@ -10,6 +11,7 @@ export const AttentionHistory = () => {
   const { user } = useAuth();
   const [attentions, setAttentions] = useState<Attention[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchCuil, setSearchCuil] = useState('');
 
   useEffect(() => {
     fetchAttentions();
@@ -37,6 +39,15 @@ export const AttentionHistory = () => {
     }
   };
 
+  const filteredAttentions = useMemo(() => {
+    if (!searchCuil.trim()) {
+      return attentions;
+    }
+    return attentions.filter(attention => 
+      attention.pacienteCuil.includes(searchCuil.trim())
+    );
+  }, [attentions, searchCuil]);
+
   if (isLoading) {
     return (
       <Card>
@@ -55,21 +66,35 @@ export const AttentionHistory = () => {
           Historial de Atenciones
         </CardTitle>
         <CardDescription>
-          {attentions.length} atención(es) registrada(s)
+          {filteredAttentions.length} de {attentions.length} atención(es)
         </CardDescription>
+        <div className="relative mt-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por CUIL del paciente..."
+            value={searchCuil}
+            onChange={(e) => setSearchCuil(e.target.value)}
+            className="pl-9"
+          />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {attentions.length === 0 ? (
+        {filteredAttentions.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
-            No hay atenciones registradas
+            {searchCuil ? 'No se encontraron atenciones para ese CUIL' : 'No hay atenciones registradas'}
           </p>
         ) : (
-          attentions.map((attention) => (
+          filteredAttentions.map((attention) => (
             <div key={attention.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <UserRound className="w-4 h-4 text-primary" />
+                  <span className="font-medium">{attention.pacienteNombre}</span>
+                  <span className="text-xs text-muted-foreground">({attention.pacienteCuil})</span>
+                </div>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  {formatInTimeZone(attention.fechaAtencion, 'America/Argentina/Buenos_Aires', "dd/MM/yyyy HH:mm", { locale: es })}
+                  {formatInTimeZone(new Date(attention.fechaAtencion), 'America/Argentina/Buenos_Aires', "dd/MM/yyyy HH:mm", { locale: es })}
                 </div>
               </div>
 

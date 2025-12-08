@@ -17,7 +17,9 @@ export interface Attention {
   informe: string;
   medicoNombre: string;
   enfermeraNombre: string;
-  fechaAtencion: Date;
+  pacienteNombre: string;
+  pacienteCuil: string;
+  fechaAtencion: string; // Keep as ISO string for timezone formatting
 }
 
 export interface CreateAttentionData {
@@ -33,6 +35,9 @@ export interface BackendAttentionResponse {
   medico_apellido: string;
   enfermera_nombre: string;
   enfermera_apellido: string;
+  paciente_nombre: string;
+  paciente_apellido: string;
+  paciente_cuil: string;
   fecha_atencion: string;
 }
 
@@ -41,5 +46,7 @@ export const mapBackendAttention = (backend: BackendAttentionResponse): Attentio
   informe: backend.informe,
   medicoNombre: `${backend.medico_nombre} ${backend.medico_apellido}`,
   enfermeraNombre: `${backend.enfermera_nombre} ${backend.enfermera_apellido}`,
-  fechaAtencion: new Date(backend.fecha_atencion),
+  pacienteNombre: `${backend.paciente_nombre} ${backend.paciente_apellido}`,
+  pacienteCuil: backend.paciente_cuil,
+  fechaAtencion: backend.fecha_atencion, // Keep as ISO string
 });
