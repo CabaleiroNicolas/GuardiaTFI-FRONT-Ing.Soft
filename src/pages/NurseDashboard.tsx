@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PatientRegistration } from '@/components/nurse/PatientRegistration';
 import { AdmissionForm } from '@/components/nurse/AdmissionForm';
-import { WaitingQueue } from '@/components/nurse/WaitingQueue';
+import { WaitingQueue } from '@/components/common/WaitingQueue';
 import { LogOut, Activity, UserPlus, ClipboardList } from 'lucide-react';
 
 const NurseDashboard = () => {
