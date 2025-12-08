@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { WaitingQueue } from '@/components/nurse/WaitingQueue';
+import { WaitingQueue } from '@/components/common/WaitingQueue';
 import { AttendPatient } from '@/components/doctor/AttendPatient';
 import { AttentionHistory } from '@/components/doctor/AttentionHistory';
 import { LogOut, Activity, UserCheck, History } from 'lucide-react';
