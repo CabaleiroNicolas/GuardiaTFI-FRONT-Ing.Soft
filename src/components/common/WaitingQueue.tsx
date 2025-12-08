@@ -18,6 +18,13 @@ export const WaitingQueue = ({ refreshTrigger, onQueueCountChange }: WaitingQueu
 
   useEffect(() => {
     fetchAdmissions();
+    
+    // Auto-refresh every 1 minute to update waiting times
+    const interval = setInterval(() => {
+      fetchAdmissions();
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, [refreshTrigger]);
 
   const fetchAdmissions = async () => {
@@ -173,15 +180,21 @@ export const WaitingQueue = ({ refreshTrigger, onQueueCountChange }: WaitingQueu
                 )}
               </div>
 
-              {/* <div className="flex items-center gap-2 text-sm pt-2 border-t">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  Ingresó {formatDistanceToNow(new Date(admission.fechaIngreso), { addSuffix: true, locale: es })}
-                </span>
-                <span className={`ml-auto ${getWaitingTimeColor(admission)}`}>
-                  ⏱️ {formatWaitingTime(getWaitingTime(admission))}
-                </span>
-              </div> */}
+              <div className="flex items-center justify-between text-sm pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    En espera: {formatWaitingTime(getWaitingTime(admission))}
+                  </span>
+                </div>
+                <div className={`flex items-center gap-1 ${getWaitingTimeColor(admission)}`}>
+                  {isOverdue(admission) ? (
+                    <span>⚠️ Excedido por {formatWaitingTime(getWaitingTime(admission) - EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime)}</span>
+                  ) : (
+                    <span>⏱️ Restante: {formatWaitingTime(EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime - getWaitingTime(admission))}</span>
+                  )}
+                </div>
+              </div>
             </div>
           ))
         )}
