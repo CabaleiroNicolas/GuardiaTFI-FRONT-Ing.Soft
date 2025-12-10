@@ -96,14 +96,35 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
         body: JSON.stringify(patientData),
       });
 
+
       if (!response.ok) {
-        if (response.status === 400 && (await response.json()).message.includes('Paciente')) {
-          toast({
-            title: "Paciente ya registrado",
-            description: "El CUIL ingresado ya corresponde a un paciente registrado.",
-            variant: "destructive",
-          });
-          return;
+        if (response.status === 400) {
+          const responseMessage = (await response.json()).message;
+
+          if (responseMessage.includes('Obra Social')) {
+            toast({
+              title: "Obra Social invalida",
+              description: "El paciente no se encuentra afiliado a la obra social seleccionada",
+              variant: "destructive",
+            });
+            return;
+          }
+          else if (responseMessage.includes('Número de Afiliado')) {
+            toast({
+              title: "Número de afiliado invalido",
+              description: "El paciente no esta vinculado al numero de afiliado",
+              variant: "destructive",
+            });
+            return;
+          }
+          else if (responseMessage.includes('Paciente')) {
+            toast({
+              title: "Paciente ya registrado",
+              description: "El CUIL ingresado ya corresponde a un paciente registrado.",
+              variant: "destructive",
+            });
+            return;
+          }
         }
       }
 

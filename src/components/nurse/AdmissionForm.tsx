@@ -111,7 +111,7 @@ export const AdmissionForm = ({ onSuccess }: AdmissionFormProps) => {
           else if (message.includes('El Paciente ya tiene un ingreso pendiente')) {
             toast({
               title: "Paciente con ingreso pendiente",
-              description: "El paciente ya tiene un ingreso pendiente en urgencias.",
+              description: "El paciente ya tiene un ingreso pendiente o en proceso en urgencias.",
               variant: "destructive",
             });
           }
