@@ -4,7 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Admission, EMERGENCY_LEVELS, BackendAdmissionResponse, mapBackendAdmissionToAdmission } from '@/types/emergency';
 import { useAuth } from '@/contexts/AuthContext';
-import { AlertTriangle, Activity, Thermometer, Clock } from 'lucide-react';
+import { AlertTriangle, Activity, Thermometer, Clock, Calendar } from 'lucide-react';
+import { formatInTimeZone } from 'date-fns-tz';
+import { es } from 'date-fns/locale';
 
 interface WaitingQueueProps {
   refreshTrigger: number;
@@ -180,19 +182,27 @@ export const WaitingQueue = ({ refreshTrigger, onQueueCountChange }: WaitingQueu
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-sm pt-2 border-t">
+              <div className="flex flex-col gap-2 text-sm pt-2 border-t">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">
-                    En espera: {formatWaitingTime(getWaitingTime(admission))}
+                    Ingreso: {formatInTimeZone(new Date(admission.fechaIngreso), 'America/Argentina/Buenos_Aires', "dd/MM/yyyy HH:mm", { locale: es })}
                   </span>
                 </div>
-                <div className={`flex items-center gap-1 ${getWaitingTimeColor(admission)}`}>
-                  {isOverdue(admission) ? (
-                    <span>⚠️ Excedido por {formatWaitingTime(getWaitingTime(admission) - EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime)}</span>
-                  ) : (
-                    <span>⏱️ Restante: {formatWaitingTime(EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime - getWaitingTime(admission))}</span>
-                  )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      En espera: {formatWaitingTime(getWaitingTime(admission))}
+                    </span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${getWaitingTimeColor(admission)}`}>
+                    {isOverdue(admission) ? (
+                      <span>⚠️ Excedido por {formatWaitingTime(getWaitingTime(admission) - EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime)}</span>
+                    ) : (
+                      <span>⏱️ Restante: {formatWaitingTime(EMERGENCY_LEVELS[admission.nivelEmergencia].maxWaitTime - getWaitingTime(admission))}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

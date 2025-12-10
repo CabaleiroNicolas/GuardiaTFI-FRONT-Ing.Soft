@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { UserPlus } from 'lucide-react';
 import { CreatePatientData } from '@/types/patient';
@@ -15,6 +16,30 @@ interface PatientRegistrationProps {
 export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [obrasSociales, setObrasSociales] = useState<string[]>([]);
+  const [isLoadingObrasSociales, setIsLoadingObrasSociales] = useState(true);
+
+  useEffect(() => {
+    fetchObrasSociales();
+  }, []);
+
+  const fetchObrasSociales = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/obras_sociales`, {
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setObrasSociales(data);
+      }
+    } catch (error) {
+      console.error('Error fetching obras sociales:', error);
+    } finally {
+      setIsLoadingObrasSociales(false);
+    }
+  };
   const [isLoading, setIsLoading] = useState(false);
 
   const [patientData, setPatientData] = useState<CreatePatientData>({
@@ -208,13 +233,22 @@ export const PatientRegistration = ({ onSuccess }: PatientRegistrationProps) => 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="obraSocial">Obra Social</Label>
-              <Input
-                id="obraSocial"
-                type="text"
-                placeholder="OSDE"
+              <Select
                 value={patientData.obraSocial}
-                onChange={(e) => setPatientData({ ...patientData, obraSocial: e.target.value })}
-              />
+                onValueChange={(value) => setPatientData({ ...patientData, obraSocial: value })}
+                disabled={isLoadingObrasSociales}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingObrasSociales ? "Cargando..." : "Seleccionar obra social"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {obrasSociales.map((obra) => (
+                    <SelectItem key={obra} value={obra}>
+                      {obra}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="numeroAfiliado">Número de Afiliado</Label>
