@@ -93,7 +93,7 @@ const Auth = () => {
             </Button>
           </form>
           <p className="text-xs text-muted-foreground text-center mt-4">
-            Desarrollo: Use "enfermera@hospital.com" o "medico@hospital.com" con cualquier contraseña
+            Desarrollo: Use "martina.stoessel@example.com" para Enfermera o "miguel.martinez@example.com" para Medico
           </p>
         </CardContent>
       </Card>
